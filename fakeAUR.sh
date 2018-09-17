@@ -30,18 +30,22 @@ for i in "$@"
             -btw )
                 description=$(echo -ne '\n' | eval "$2" | grep "    ")
                 name=$(echo $2 | grep -Eo "[^ ]+$")
+                helper=$(echo $2 | grep -o '^\S*')
+                echo ${PS1@P}$helper btwiusearch
                 echo -ne '\n' | eval $2 | sed -e "s/$name/btwiusearch/" | sed -e "s/$description/A very important and easy to use package to show the world that you run the best distro/"
             ;;
             -nani )
-                echo ${PS1@P}$2
                 description=$(echo -ne '\n' | eval "$2" | grep "    ")
                 name=$(echo $2 | grep -Eo "[^ ]+$")
+                helper=$(echo $2 | grep -o '^\S*')
+                echo ${PS1@P}$helper nani
                 echo -ne '\n' | eval $2 | sed -e "s/$name/nani/" | sed -e "s/$description/now you can speak japanese/"
             ;;
             -echo )
-                echo ${PS1@P}$2
                 description=$(echo -ne '\n' | eval "$2" | grep "    ")
                 name=$(echo $2 | grep -Eo "[^ ]+$")
+                helper=$(echo $2 | grep -o '^\S*')
+                echo ${PS1@P}$helper $3
                 echo -ne '\n' | eval $2 | sed -e "s/$name/$3/" | sed -e "s/$description/$4/"
             ;;
             -grep)
