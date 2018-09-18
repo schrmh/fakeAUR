@@ -2,6 +2,7 @@
 Important if you want to use the script and not the AUR package:
 I use ps -f and filter the output with grep and then eval the result of that. And since I needed a different grep script etc. so that the AUR package will function correctly you need to copy something from an older script version to the new one if you want to use the new one. The last one that should work for you is b8f4cfac0c5a598f4bc559e928427477ca8c99d6 "Piping is now possible". Just copy what is between -btw ) and the last uncommented echo. That being said: There is no real difference between the newest version and that one (as of 18th of September 2018).
 
+Old description in case you want to use the old version of the script (the new one works without -echo and works like it is described in 4)):
 _______
 fakeAUR
 You need to use the option -echo and provide AUR helper (e.g. yay) + old name package name, new package name and new description:
