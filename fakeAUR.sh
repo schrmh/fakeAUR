@@ -30,7 +30,7 @@ function get_data {
 }
 
 function fake_data {
-    [[ $helper != "bash" ]] && {
+    [[ $helper != "/bin/bash" ]] && {
     echo ${PS1@P}$helper "$1"
     echo -ne '\n' | eval ${pac} --color=always | sed -e "s/$name/$1/" | sed -e "s/$description/$2/"
     }
