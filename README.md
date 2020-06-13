@@ -1,5 +1,8 @@
 # fakeAUR
-Branch for people that can't use the AUR. Keep in mind that I created this branch at a later date, so it might contain some AUR-only versions.
+Branch for people that can't use the AUR. Keep in mind that I created this branch at a later date, so it contains some AUR-only versions.
+Versions after b8f4cfac0c5a598f4bc559e928427477ca8c99d6 are AUR-only versions... 
+...until the first commit that explicitly contains "non-AUR" in the commit message (5c2ce3b1e86170fb19b19cdb082ca9e9c13cd330).
+
 
 Old description in case you want to use the old version of the script (the new one works without -echo and works like it is described in 4)):
 _______
