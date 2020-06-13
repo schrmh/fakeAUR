@@ -1,8 +1,8 @@
 #!/bin/bash -i
 #Developer: schrmh (schreibemirhalt@gmail.com) / derberg#7221 from Linux Gaming Discord
-#Version: 2.1 - now with impossible piping
+#Version: 2 - now with impossible piping
 function show_help () {
-    echo "fakeAUR 2.1 - now with impossible piping"
+    echo "fakeAUR 2 - now with impossible piping"
     echo "You pipe with your package helper (e.g yay) and provide a new package name and a new description:"
     echo "yay <package> | fakeAUR nani \"now you can speak japanese\""
     echo ""
@@ -13,36 +13,14 @@ function show_help () {
     echo "3) Copy a screnshoot to clipboard"
     echo "4) Fix formatted output for trizen.."
     echo "5) A config file that allows custom shortcuts that are like -btw or -nani"
-    echo "6) Ignore shells that aren't bash too"
-    echo "Try -debug if something is wrong with the output"
+    echo "DEBUG2"
 }
-
-function process_search {
-    processes=$(> >(ps -f))
-    pac=$(echo $processes | grep -o -P "(?<=00:00:00).*(?=$USER)" | grep -o -P "(?<=00:00:00).*(?=00:00:00)")
-    helper=$(echo $pac | cut -d' ' -f1)
-    pac=$helper" "$(echo $pac | cut -d' ' -f2)
-}
-
-function get_data {
-    description=$(echo -ne '\n' | eval "${pac}" | grep "    ")
-    name=$(echo ${pac} | grep -Eo "[^ ]+$")
-}
-
-function fake_data {
-    [[ $helper != "bash" ]] && {
-    echo ${PS1@P}$helper "$1"
-    echo -ne '\n' | eval ${pac} --color=always | sed -e "s/$name/$1/" | sed -e "s/$description/$2/"
-    }
-}
-
 if [ $# -eq 0 ] 
 then
     show_help
     exit 1
 fi
 
-first="enabled"
 for i in "$@"
     do 
         case $i in
@@ -56,7 +34,9 @@ for i in "$@"
                 echo "and now reduced"
                 pac=$(echo $processes | grep -o -P "(?<=00:00:00).*(?=$USER)" | grep -o -P "(?<=00:00:00).*(?=00:00:00)")
                 echo $pac
-                pac=$(echo $pac | cut -d' ' -f1)" "$(echo $pac | cut -d' ' -f2)
+                one=$(echo $pac | cut -d' ' -f1)
+                two=$(echo $pac | cut -d' ' -f2)
+                pac=$one" "$two
                 echo concat
                 echo $pac
                 echo concat end
@@ -73,31 +53,68 @@ for i in "$@"
                # fi
                # echo $pac
             
-                get_data
-                fake_data "btwiusearch" "A very important and easy to use package to show the world that you run the best distro"
+                description=$(echo -ne '\n' | eval "${pac:1}" | grep "    ")
+                name=$(echo ${pac:1} | grep -Eo "[^ ]+$")
+                helper=$(echo ${pac:1} | grep -o '^\S*')
+                echo ${PS1@P}$helper btwiusearch
+                echo -ne '\n' | eval ${pac:1} | sed -e "s/$name/btwiusearch/" | sed -e "s/$description/A very important and easy to use package to show the world that you run the best distro/"
             ;;
             -btw )
-                process_search
-                get_data
-                fake_data "btwiusearch" "A very important and easy to use package to show the world that you run the best distro"
+                processes=$(> >(ps -f))
+                pac=$(echo $processes | grep -o -P '(?<=CM).*(?=fakeAUR)' | grep -o -P '(?<=D).*(?=fakeAUR)' | grep -o -P "(?<=00:00:00).*(?=$USER)")
+                if [[ $pac = *"00"* ]]; then
+                    delete=$(echo $pac | grep -oP "(?<=$USER\s)\w+")
+                    pac=$(echo $pac | grep -o -P '(?<=00:00:00).*(?=)')
+                    kill -9 $delete
+                fi
+            
+                description=$(echo -ne '\n' | eval "${pac:1}" | grep "    ")
+                name=$(echo ${pac:1} | grep -Eo "[^ ]+$")
+                helper=$(echo ${pac:1} | grep -o '^\S*')
+                echo ${PS1@P}$helper btwiusearch
+                echo -ne '\n' | eval ${pac:1} | sed -e "s/$name/btwiusearch/" | sed -e "s/$description/A very important and easy to use package to show the world that you run the best distro/"
             ;;
             -nani )
-                process_search
-                get_data
-                fake_data "nani" "now you can speak japanese"
+                processes=$(> >(ps -f))
+                pac=$(echo $processes | grep -o -P '(?<=CM).*(?=fakeAUR)' | grep -o -P '(?<=D).*(?=fakeAUR)' | grep -o -P "(?<=00:00:00).*(?=$USER)")
+                if [[ $pac = *"00"* ]]; then
+                    delete=$(echo $pac | grep -oP "(?<=$USER\s)\w+")
+                    pac=$(echo $pac | grep -o -P '(?<=00:00:00).*(?=)')
+                    kill -9 $delete
+                fi
+            
+                description=$(echo -ne '\n' | eval "${pac:1}" | grep "    ")
+                name=$(echo ${pac:1} | grep -Eo "[^ ]+$")
+                helper=$(echo ${pac:1} | grep -o '^\S*')
+                echo ${PS1@P}$helper nani
+                echo -ne '\n' | eval ${pac:1} | sed -e "s/$name/nani/" | sed -e "s/$description/now you can speak japanese/"
             ;;
             -grep)
-                process_search
-                description=$(echo -ne '\n' | eval "${pac}" | grep "    ")
+                processes=$(> >(ps -f))
+                pac=$(echo $processes | grep -o -P '(?<=CM).*(?=fakeAUR)' | grep -o -P '(?<=D).*(?=fakeAUR)' | grep -o -P "(?<=00:00:00).*(?=$USER)")
+                if [[ $pac = *"00"* ]]; then
+                    delete=$(echo $pac | grep -oP "(?<=$USER\s)\w+")
+                    pac=$(echo $pac | grep -o -P '(?<=00:00:00).*(?=)')
+                    kill -9 $delete
+                fi
+            
+                description=$(echo -ne '\n' | eval "${pac:1}" | grep "    ")
                 echo $description
             ;;
             *)
-                if [[ $first = "enabled" ]]; then
-                    first="disabled"
-                    process_search
-                    get_data
-                    fake_data "$1" "$2"
+                processes=$(> >(ps -f))
+                pac=$(echo $processes | grep -o -P '(?<=CM).*(?=fakeAUR)' | grep -o -P '(?<=D).*(?=fakeAUR)' | grep -o -P "(?<=00:00:00).*(?=$USER)")
+                if [[ $pac = *"00"* ]]; then
+                    delete=$(echo $pac | grep -oP "(?<=$USER\s)\w+")
+                    pac=$(echo $pac | grep -o -P '(?<=00:00:00).*(?=)')
+                    kill -9 $delete
                 fi
+            
+                description=$(echo -ne '\n' | eval "${pac:1}" | grep "    ")
+                name=$(echo ${pac:1} | grep -Eo "[^ ]+$")
+                helper=$(echo ${pac:1} | grep -o '^\S*')
+                echo ${PS1@P}$helper $1
+                echo -ne '\n' | eval ${pac:1} | sed -e "s/$name/$1/" | sed -e "s/$description/$2/"
             ;;
         esac
     done
