@@ -2,7 +2,7 @@
 #Developer: schrmh (schreibemirhalt@gmail.com) / derberg#7221 from Linux Gaming Discord
 #Version: 2.1 - now with impossible piping
 function show_help () {
-    echo "fakeAUR 2.1 - now with impossible piping"
+    echo "fakeAUR 2.2 - now with impossible piping (fixed)"
     echo "You pipe with your package helper (e.g yay) and provide a new package name and a new description:"
     echo "yay <package> | fakeAUR nani \"now you can speak japanese\""
     echo ""
@@ -18,8 +18,8 @@ function show_help () {
 }
 
 function process_search {
-    processes=$(> >(ps -f))
-    pac=$(echo $processes | grep -o -P "(?<=00:00:00).*(?=$USER)" | grep -o -P "(?<=00:00:00).*(?=00:00:00)")
+    processes=$(ps -f | tr -s '\n' ' ')
+    pac=$(echo $processes | rev | awk -F00:00:00 -v n=5 '{ for(i=1;i<=n;++i) s = s (s=="" ? "" : FS) $i; print s}' | rev | awk -F00:00:00 '/00:00:00/{print $1}' | sed "s|\(.*\)$USER.*|\1|")
     helper=$(echo $pac | cut -d' ' -f1)
     pac=$helper" "$(echo $pac | cut -d' ' -f2)
 }
@@ -51,16 +51,33 @@ for i in "$@"
                 exit 1
             ;;
             -debug )
-                processes=$(> >(ps -f))
-                echo $processes
-                echo "and now reduced"
-                pac=$(echo $processes | grep -o -P "(?<=00:00:00).*(?=$USER)" | grep -o -P "(?<=00:00:00).*(?=00:00:00)")
-                echo $pac
-                pac=$(echo $pac | cut -d' ' -f1)" "$(echo $pac | cut -d' ' -f2)
-                echo concat
-                echo $pac
-                echo concat end
-                
+	       #Written on my current system. If it doesn't work, then try a older version or preferabely message me. Command suggestions welcome by the way.
+		processes=$(ps -f | tr -s '\n' ' ')
+		echo $processes
+		echo "---------"
+		echo "piped command should be first in line (cuts after nth apperance of 00:00:00)"
+		pac=$(echo $processes | rev | awk -F00:00:00 -v n=5 '{ for(i=1;i<=n;++i) s = s (s=="" ? "" : FS) $i; print s}' | rev)
+		echo $pac
+		echo "---------"
+		echo "reduced to from piped command until before first 00:00:00"
+		pac=$(echo $pac | awk -F00:00:00 '/00:00:00/{print $1}')
+		echo $pac
+		echo "piped command (I hope)"
+		pac=$(echo $pac | sed "s|\(.*\)$USER.*|\1|")
+		echo $pac
+
+	       #V2
+               # processes=$(> >(ps -f))
+               # echo $processes
+               # echo "and now reduced"
+               # pac=$(echo $processes | grep -o -P "(?<=00:00:00).*(?=$USER)" | grep -o -P "(?<=00:00:00).*(?=00:00:00)")
+               # echo $pac
+               # pac=$(echo $pac | cut -d' ' -f1)" "$(echo $pac | cut -d' ' -f2)
+               # echo concat
+               # echo $pac
+               # echo concat end
+
+               #V1
                # if [[ $pac = *"00"* ]]; then
                #     delete=$(echo $pac | grep -oP "(?<=$USER\s)\w+")
                #     pac=$(echo $pac | grep -o -P '(?<=00:00:00).*(?=)')
@@ -86,7 +103,7 @@ for i in "$@"
                 get_data
                 fake_data "nani" "now you can speak japanese"
             ;;
-            -grep)
+            -grep )
                 process_search
                 description=$(echo -ne '\n' | eval "${pac}" | grep "    ")
                 echo $description
