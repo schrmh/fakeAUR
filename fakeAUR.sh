@@ -1,121 +1,109 @@
-#!/bin/bash -i
-#Developer: schrmh (schreibemirhalt@gmail.com) / derberg#7221 from Linux Gaming Discord
-#Version: 2.1 - now with impossible piping
-function show_help () {
-    echo "fakeAUR 2.2 - now with impossible piping (fixed)"
-    echo "You pipe with your package helper (e.g yay) and provide a new package name and a new description:"
-    echo "yay <package> | fakeAUR nani \"now you can speak japanese\""
+#!/bin/sh
+parent_pid=$PPID
+#Developer: @derberg:matrix.org
+#Version: 3 - Done right
+show_help () {
+    echo "fakeAUR 3 - Done right"
+    echo "You pipe with your package helper (e.g paru) and provide a new package name and a new description:"
+    echo "paru <package> | fakeAUR nani \"now you can speak japanese\""
     echo ""
     echo "use -btw without further parameters for a btwiusearch message or -nani for that nani message."
-    echo "-grep will grep the original description of the piped package"
-    echo "TODO: 1). switch between core/community/aur or custom with colour. Also version, size, orphanded, etc."
+    echo "-grep will print the original description of the piped package"
+    echo "TODO:"
+    echo "1). switch between core/community/aur or custom with colour. Also version, size, orphanded, etc."
     echo "2) Manipulate multiple packages at once and list them just like a package helper would"
-    echo "3) Copy a screnshoot to clipboard"
+    echo "3) Copy a screenshoot to clipboard"
     echo "4) Fix formatted output for trizen.."
     echo "5) A config file that allows custom shortcuts that are like -btw or -nani"
-    echo "6) Ignore shells that aren't bash too"
     echo "Try -debug if something is wrong with the output"
 }
 
-function process_search {
-    processes=$(ps -f | tr -s '\n' ' ')
-    pac=$(echo $processes | rev | awk -F00:00:00 -v n=5 '{ for(i=1;i<=n;++i) s = s (s=="" ? "" : FS) $i; print s}' | rev | awk -F00:00:00 '/00:00:00/{print $1}' | sed "s|\(.*\)$USER.*|\1|")
-    helper=$(echo $pac | cut -d' ' -f1)
-    pac=$helper" "$(echo $pac | cut -d' ' -f2)
+get_data () {
+pac="$(tr '\0' ' ' </proc/$(cat /proc/$parent_pid/task/$parent_pid/children | cut -d' ' -f1)/cmdline)"
+    local package=$(echo "$pac" | cut -d' ' -f2)
+    query=$(printf %s "$package" | jq -s -R -r @uri) #urlencode
+    results=$(curl -s "https://aur.archlinux.org/rpc/?v=5&type=search&arg=$query" | jq -r '.results')
+    if [ "$results" = "[]" ]; then
+        echo "No results found for '$package'"
+        exit
+    else
+        name=$(echo "$results" | jq -r '.[] | "\(.Name)"')
+        description=$(echo "$results" | jq -r '.[] | "\(.Description)"')
+    fi
 }
 
-function get_data {
-    description=$(echo -ne '\n' | eval "${pac}" | grep "    ")
-    name=$(echo ${pac} | grep -Eo "[^ ]+$")
+fake_data () {
+    printf '\n' | eval "$pac" --color=always | sed -e "s/$name/$1/" | sed -e "s/$description/$2/"
 }
 
-function fake_data {
-    [[ $helper != "/bin/bash" ]] && {
-    echo ${PS1@P}$helper "$1"
-    echo -ne '\n' | eval ${pac} --color=always | sed -e "s/$name/$1/" | sed -e "s/$description/$2/"
-    }
-}
-
-if [ $# -eq 0 ] 
+if [ $# -ne 1 ]
 then
-    show_help
-    exit 1
-fi
-
-first="enabled"
-for i in "$@"
-    do 
-        case $i in
-            -h | --h | --help )
-                show_help
-                exit 1
-            ;;
+    if [ $# -eq 2 ] 
+    then
+        get_data
+        fake_data "$1" "$2"
+    else
+        show_help
+        exit 1
+    fi
+else
+    if [ ! -p /dev/stdin ]; then
+        echo "You did not pipe a command. Read the help!"
+        show_help
+        exit 1
+    else
+        case $1 in
             -debug )
-	       #Written on my current system. If it doesn't work, then try a older version or preferabely message me. Command suggestions welcome by the way.
-		processes=$(ps -f | tr -s '\n' ' ')
-		echo $processes
-		echo "---------"
-		echo "piped command should be first in line (cuts after nth apperance of 00:00:00)"
-		pac=$(echo $processes | rev | awk -F00:00:00 -v n=5 '{ for(i=1;i<=n;++i) s = s (s=="" ? "" : FS) $i; print s}' | rev)
-		echo $pac
-		echo "---------"
-		echo "reduced to from piped command until before first 00:00:00"
-		pac=$(echo $pac | awk -F00:00:00 '/00:00:00/{print $1}')
-		echo $pac
-		echo "piped command (I hope)"
-		pac=$(echo $pac | sed "s|\(.*\)$USER.*|\1|")
-		echo $pac
-
-	       #V2
-               # processes=$(> >(ps -f))
-               # echo $processes
-               # echo "and now reduced"
-               # pac=$(echo $processes | grep -o -P "(?<=00:00:00).*(?=$USER)" | grep -o -P "(?<=00:00:00).*(?=00:00:00)")
-               # echo $pac
-               # pac=$(echo $pac | cut -d' ' -f1)" "$(echo $pac | cut -d' ' -f2)
-               # echo concat
-               # echo $pac
-               # echo concat end
-
-               #V1
-               # if [[ $pac = *"00"* ]]; then
-               #     delete=$(echo $pac | grep -oP "(?<=$USER\s)\w+")
-               #     pac=$(echo $pac | grep -o -P '(?<=00:00:00).*(?=)')
-               #     echo lol
-               #     echo $pac
-               #     echo rid off me
-               #     echo $delete
-               #     echo now
-               #     kill -9 $delete
-               # fi
-               # echo $pac
-            
-                get_data
-                fake_data "btwiusearch" "A very important and easy to use package to show the world that you run the best distro"
+                if [ -p /dev/stdin ]; then
+                    echo "You piped something to this script!"
+                    echo "Some output of the command you piped:"
+                    read input
+                    echo "$input"
+                    echo "That was all."
+                    pipe=true
+                else
+                    echo "No input piped to script."
+                fi
+                echo "NOTE: If you pipe the echo command into this script, you get wrong info"
+                echo "This script is a child of PID "$parent_pid": $(tr '\0' ' ' </proc/$parent_pid/cmdline)"
+                children="$(cat /proc/$parent_pid/task/$parent_pid/children)"
+                echo "All childs of this: $children"
+                echo "Check with this process table:"
+                ps -f
+                parent_tty="$(ps -o tty= -p $parent_pid)"
+                echo "tty of the parent should be: $parent_tty"
+                echo "Based on this, check this process tree:"
+                ps f | grep "$parent_tty"
+                wanted_pid=$(echo $children | cut -d' ' -f1)
+                echo "This is the cmdline for PID $wanted_pid ("$([ -z "$pipe" ] && echo "this script):" || echo "before the pipe | ):")
+                cmdline="$(tr '\0' ' ' </proc/$wanted_pid/cmdline)"
+                echo "$cmdline"
+                echo "Use this outside of a script (might lock your pacman db.lck, add killing code if so):" 
+                echo "$cmdline | tr '\0' ' ' </proc/\$(cat /proc/\$$/task/\$$/children | rev | cut -d' ' -f3 | rev)/cmdline"
+                echo ""
+                echo "I will kill $wanted_pid now. You might still see some output:"
+                sleep 0.1
+                kill -9 "$wanted_pid"
+                echo ""
+                echo "Script is done."
             ;;
             -btw )
-                process_search
                 get_data
                 fake_data "btwiusearch" "A very important and easy to use package to show the world that you run the best distro"
             ;;
             -nani )
-                process_search
                 get_data
                 fake_data "nani" "now you can speak japanese"
             ;;
             -grep )
-                process_search
-                description=$(echo -ne '\n' | eval "${pac}" | grep "    ")
+                get_data
                 echo $description
             ;;
             *)
-                if [[ $first = "enabled" ]]; then
-                    first="disabled"
-                    process_search
-                    get_data
-                    fake_data "$1" "$2"
-                fi
+                show_help
+                exit 1
             ;;
         esac
-    done
+    fi
+fi
 exit 0
