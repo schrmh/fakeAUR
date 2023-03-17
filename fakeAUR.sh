@@ -12,7 +12,7 @@ show_help () {
     echo "TODO:"
     echo "1). switch between core/community/aur or custom with colour. Also version, size, orphanded, etc."
     echo "2) Manipulate multiple packages at once and list them just like a package helper would"
-    echo "3) Copy a screenshoot to clipboard"
+    echo "3) Copy a screenshot to clipboard"
     echo "4) Fix formatted output for trizen.."
     echo "5) A config file that allows custom shortcuts that are like -btw or -nani"
     echo "Try -debug if something is wrong with the output"
