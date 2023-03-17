@@ -27,8 +27,8 @@ pac="$(tr '\0' ' ' </proc/$(cat /proc/$parent_pid/task/$parent_pid/children | cu
         echo "No results found for '$package'"
         exit
     else
-        name=$(echo "$results" | jq -r '.[] | "\(.Name)"')
-        description=$(echo "$results" | jq -r '.[] | "\(.Description)"')
+        name=$(echo "$results" | jq -r '.[] | select(.Name | startswith("'$query'")) | "\(.Name)"' | head -n1)
+        description=$(echo "$results" | jq -r '.[] | select(.Name | startswith("'$query'")) | "\(.Description)"'| head -n1)
     fi
 }
 
